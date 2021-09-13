@@ -73,9 +73,11 @@ function App() {
 
   // Websocket reference hook
   const controllerSocket = useRef()
+  const controllerAnonSocket = useRef()
 
   // Used for websocket auto reconnect
   const [websocket, setWebsocket] = useState(false)
+  const [anonwebsocket, setAnonWebsocket] = useState(false)
 
   // State governs whether the app should be loaded. Depends on the loadingArray
   const [appIsLoaded, setAppIsLoaded] = useState(false)
@@ -109,10 +111,43 @@ function App() {
 
   const [QRCodeURL, setQRCodeURL] = useState('')
   const [focusedConnectionID, setFocusedConnectionID] = useState('')
+  const [verificationStatus, setVerificationStatus] = useState()
 
   // (JamesKEbert) Note: We may want to abstract the websockets out into a high-order component for better abstraction, especially potentially with authentication/authorization
 
   // Perform First Time Setup. Connect to Controller Server via Websockets
+
+  // always configure the anon websocket for Liquid Avatar
+  if (!anonwebsocket) {
+    let url = new URL('/api/anon/ws', window.location.href)
+    url.protocol = url.protocol.replace('http', 'ws')
+    controllerAnonSocket.current = new WebSocket(url.href)
+    setAnonWebsocket(true)
+
+    controllerAnonSocket.current.onclose = (event) => {
+      // Auto Reopen websocket connection
+      // (JamesKEbert) TODO: Converse on sessions, session timeout and associated UI
+
+      setLoggedIn(false)
+      setAnonWebsocket(!anonwebsocket)
+    }
+
+    // Error Handler
+    controllerAnonSocket.current.onerror = (event) => {
+      setNotification('Client Error - Websockets', 'error')
+    }
+
+    // Receive new message from Controller Server
+    controllerAnonSocket.current.onmessage = (message) => {
+      const parsedMessage = JSON.parse(message.data)
+
+      messageHandler(
+        parsedMessage.context,
+        parsedMessage.type,
+        parsedMessage.data
+      )
+    }
+  }
 
   // Setting up websocket and controllerSocket
   useEffect(() => {
@@ -227,10 +262,33 @@ function App() {
     }
   }, [session, loggedIn, users, user, websocket, image, loggedInUserState]) // (Simon) We have to listen to all 7 to for the app to function properly
 
-  // Send a message to the Controller server
-  function sendMessage(context, type, data = {}) {
-    controllerSocket.current.send(JSON.stringify({ context, type, data }))
-  }
+    // Send a message to the Controller server
+    function sendAnonMessage(context, type, data = {}) {
+      if (
+        controllerAnonSocket.current.readyState !==
+        controllerAnonSocket.current.OPEN
+      ) {
+        setTimeout(function () {
+          sendAnonMessage(context, type, data)
+        }, 100)
+      } else {
+        controllerAnonSocket.current.send(JSON.stringify({ context, type, data }))
+      }
+    }
+
+      // Send a message to the Controller server
+      function sendMessage(context, type, data = {}) {
+        if (
+          controllerSocket.current.readyState !==
+          controllerSocket.current.OPEN
+        ) {
+          setTimeout(function () {
+            sendMessage(context, type, data)
+          }, 100)
+        } else {
+          controllerSocket.current.send(JSON.stringify({ context, type, data }))
+        }
+      }
 
   // Handle inbound messages
   const messageHandler = async (context, type, data = {}) => {
@@ -262,18 +320,6 @@ function App() {
           switch (type) {
             case 'INVITATION':
               setQRCodeURL(data.invitation_record.invitation_url)
-              break
-
-            case 'SINGLE_USE_USED':
-              if (data.workflow === 'test_id') {
-                // (mikekebert) Reset the QR code URL (which also closes the QR code modal)
-                setQRCodeURL('')
-                // (mikekebert) Set the connection_id so we can issue a credential to a particular connection
-                setFocusedConnectionID(data.connection_id)
-              } else {
-                // (mikekebert) Reset the QR code URL (which also closes the QR code modal)
-                setQRCodeURL('')
-              }
               break
 
             case 'INVITATIONS_ERROR':
@@ -534,6 +580,28 @@ function App() {
           }
 
           break
+
+          case 'PRESENTATIONS':
+          switch (type) {
+            case 'EMAIL_VERIFIED':
+              setVerificationStatus(true)
+
+              break
+
+            case 'VERIFICATION_FAILED':
+              setVerificationStatus(false)
+
+              break
+            default:
+              setNotification(
+                `Error - Unrecognized Websocket Message Type: ${type}`,
+                'error'
+              )
+              break
+          }
+
+          break
+
         case 'PRESENTATIONS':
           switch (type) {
             case 'VERIFIED':
@@ -797,8 +865,11 @@ function App() {
                           logo={image}
                           history={history}
                           setUpUser={setUpUser}
-                          sendRequest={sendMessage}
                           setLoggedIn={setLoggedIn}
+                          QRCodeURL={QRCodeURL}
+                          sendRequest={sendAnonMessage}
+                          contacts={contacts}
+                          verificationStatus={verificationStatus}
                         />
                       </Main>
                     </Frame>

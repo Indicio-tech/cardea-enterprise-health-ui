@@ -2,6 +2,8 @@ import Axios from 'axios'
 import React, { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components'
 
+import QR from 'qrcode.react'
+
 import { useNotification } from './NotificationProvider'
 import { handleImageSrc } from './util'
 
@@ -72,8 +74,30 @@ function Login(props) {
     props.history.push('/forgot-password')
   }
 
+  const presentInvite = () => {
+    // props.sendRequest('INVITATIONS', 'CREATE_SINGLE_USE', {
+    //   workflow: 'test_id',
+    // })
+    props.sendRequest('INVITATIONS', 'CREATE_SINGLE_USE', {})
+  }
+
   return (
     <FormContainer>
+      {props.QRCodeURL ? (
+                              <div className="qr">
+                              <p>     
+                              <QR
+                                value={props.QRCodeURL}
+                                size={256}
+                                renderAs="svg"
+                              />                      
+                              </p>
+                            </div>  
+                          ) : (
+                            <p>
+                              <span>Loading...</span>
+                            </p>
+                          )}
       <LogoHolder>
         {logo ? <Logo src={logo} alt="Logo" /> : <Logo />}
       </LogoHolder>
