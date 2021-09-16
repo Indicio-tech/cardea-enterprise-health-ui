@@ -33,6 +33,10 @@ function Login(props) {
   const setNotification = useNotification()
 
   useEffect(() => {
+    props.sendRequest('INVITATIONS', 'CREATE_SINGLE_USE', {})
+  }, [])
+
+  useEffect(() => {
     // Fetching the logo
     Axios({
       method: 'GET',
@@ -74,30 +78,26 @@ function Login(props) {
     props.history.push('/forgot-password')
   }
 
-  const presentInvite = () => {
-    // props.sendRequest('INVITATIONS', 'CREATE_SINGLE_USE', {
-    //   workflow: 'test_id',
-    // })
-    props.sendRequest('INVITATIONS', 'CREATE_SINGLE_USE', {})
-  }
+  // const presentInvite = () => {
+  //   // props.sendRequest('INVITATIONS', 'CREATE_SINGLE_USE', {
+  //   //   workflow: 'test_id',
+  //   // })
+  //   props.sendRequest('INVITATIONS', 'CREATE_SINGLE_USE', {})
+  // }
 
   return (
     <FormContainer>
       {props.QRCodeURL ? (
-                              <div className="qr">
-                              <p>     
-                              <QR
-                                value={props.QRCodeURL}
-                                size={256}
-                                renderAs="svg"
-                              />                      
-                              </p>
-                            </div>  
-                          ) : (
-                            <p>
-                              <span>Loading...</span>
-                            </p>
-                          )}
+        <div className="qr">
+          <p>
+            <QR value={props.QRCodeURL} size={256} renderAs="svg" />
+          </p>
+        </div>
+      ) : (
+        <p>
+          <span>Loading...</span>
+        </p>
+      )}
       <LogoHolder>
         {logo ? <Logo src={logo} alt="Logo" /> : <Logo />}
       </LogoHolder>

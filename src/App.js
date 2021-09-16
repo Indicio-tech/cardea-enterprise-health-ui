@@ -152,7 +152,7 @@ function App() {
   // Setting up websocket and controllerSocket
   useEffect(() => {
     if (session && loggedIn && websocket) {
-      let url = new URL('/api/ws', window.location.href)
+      let url = new URL('/api/admin/ws', window.location.href)
       url.protocol = url.protocol.replace('http', 'ws')
       controllerSocket.current = new WebSocket(url.href)
       setWebsocket(true)
@@ -262,33 +262,30 @@ function App() {
     }
   }, [session, loggedIn, users, user, websocket, image, loggedInUserState]) // (Simon) We have to listen to all 7 to for the app to function properly
 
-    // Send a message to the Controller server
-    function sendAnonMessage(context, type, data = {}) {
-      if (
-        controllerAnonSocket.current.readyState !==
-        controllerAnonSocket.current.OPEN
-      ) {
-        setTimeout(function () {
-          sendAnonMessage(context, type, data)
-        }, 100)
-      } else {
-        controllerAnonSocket.current.send(JSON.stringify({ context, type, data }))
-      }
+  // Send a message to the Controller server
+  function sendAnonMessage(context, type, data = {}) {
+    if (
+      controllerAnonSocket.current.readyState !==
+      controllerAnonSocket.current.OPEN
+    ) {
+      setTimeout(function () {
+        sendAnonMessage(context, type, data)
+      }, 100)
+    } else {
+      controllerAnonSocket.current.send(JSON.stringify({ context, type, data }))
     }
+  }
 
-      // Send a message to the Controller server
-      function sendMessage(context, type, data = {}) {
-        if (
-          controllerSocket.current.readyState !==
-          controllerSocket.current.OPEN
-        ) {
-          setTimeout(function () {
-            sendMessage(context, type, data)
-          }, 100)
-        } else {
-          controllerSocket.current.send(JSON.stringify({ context, type, data }))
-        }
-      }
+  // Send a message to the Controller server
+  function sendMessage(context, type, data = {}) {
+    if (controllerSocket.current.readyState !== controllerSocket.current.OPEN) {
+      setTimeout(function () {
+        sendMessage(context, type, data)
+      }, 100)
+    } else {
+      controllerSocket.current.send(JSON.stringify({ context, type, data }))
+    }
+  }
 
   // Handle inbound messages
   const messageHandler = async (context, type, data = {}) => {
@@ -581,7 +578,7 @@ function App() {
 
           break
 
-          case 'PRESENTATIONS':
+        case 'PRESENTATIONS':
           switch (type) {
             case 'EMAIL_VERIFIED':
               setVerificationStatus(true)
