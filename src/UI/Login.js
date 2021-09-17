@@ -1,6 +1,7 @@
 import Axios from 'axios'
 import React, { useRef, useState, useEffect } from 'react'
 import styled from 'styled-components'
+import Cookies from 'universal-cookie'
 
 import QR from 'qrcode.react'
 import './Login.css'
@@ -30,6 +31,8 @@ const ForgotPasswordLink = styled.a`
 
 function Login(props) {
   const [logo, setLogo] = useState(null)
+
+  const cookies = new Cookies()
 
   // Accessing notification context
   const setNotification = useNotification()
@@ -97,8 +100,13 @@ function Login(props) {
       },
       url: '/api/user/passwordless-log-in',
     }).then((res) => {
-      if (res.data.error) setNotification(res.data.error, 'error')
-      else {
+
+      if (res.data.error) {
+        setNotification(res.data.error, 'error')
+      } else {
+        // Setting a session cookie this way doesn't seem to be the best way
+        cookies.set('sessionId', res.data.session, { path: '/', expires: res.data.session.expires, httpOnly: res.data.session.httpOnly, originalMaxAge: res.data.session.originalMaxAge })
+
         props.setLoggedIn(true)
         props.setUpUser(res.data.id, res.data.username, res.data.roles)
       }
