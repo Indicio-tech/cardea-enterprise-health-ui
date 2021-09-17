@@ -581,8 +581,8 @@ function App() {
 
         case 'PRESENTATIONS':
           switch (type) {
-            case 'EMAIL_VERIFIED':
-              setVerifiedCredential(data.revealed_attrs)
+            case 'VERIFIED':
+              setVerifiedCredential(data.address.raw)
               setVerificationStatus(true)
 
               break
