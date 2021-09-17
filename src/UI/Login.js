@@ -43,6 +43,8 @@ function Login(props) {
     setWaitingForInvitation(true)
   }
 
+  console.log(props.verificationStatus)
+
   useEffect(() => {
     if (props.QRCodeURL !== '') {
       setWaitingForConnection(true)
@@ -66,6 +68,13 @@ function Login(props) {
     })
   }, [setNotification])
 
+  // Maybe we can call the function here?
+  useEffect(() => {
+    if (connected && props.verificationStatus !== undefined && props.verificationStatus) {
+      handlePasswordlessSubmit()
+    }
+  }, [connected, props.verificationStatus])
+
   const loginForm = useRef()
 
   const handleSubmit = (e) => {
@@ -79,6 +88,26 @@ function Login(props) {
         password: form.get('password'),
       },
       url: '/api/user/log-in',
+    }).then((res) => {
+      if (res.data.error) setNotification(res.data.error, 'error')
+      else {
+        props.setLoggedIn(true)
+
+        props.setUpUser(res.data.id, res.data.username, res.data.roles)
+      }
+    })
+  }
+
+  const handlePasswordlessSubmit = (e) => {
+    e.preventDefault()
+    console.log("We are the void")
+    console.log(props.validatedCredential.address.raw)
+    Axios({
+      method: 'POST',
+      data: {
+        email: props.validatedCredential.address.raw
+      },
+      url: '/api/user/passwordless-log-in',
     }).then((res) => {
       if (res.data.error) setNotification(res.data.error, 'error')
       else {
@@ -136,22 +165,8 @@ function Login(props) {
                   {connected ? (
                     props.verificationStatus !== undefined ? (
                       props.verificationStatus ? (
-                        props.verifiedCredential ? (
-                          <div className="right-fold landing-col-6">
-                            <h1 className="header">Credentials Verified!</h1>
-                            <p className="para">
-                              Email: {props.verifiedCredential.address.raw}
-                            </p>
-                          </div>
+                          <></>
                         ) : (
-                          <div className="right-fold landing-col-6">
-                            <h1 className="header">Credentials Verified!</h1>
-                            <p className="para">
-                              No Credential Data Was Passed
-                            </p>
-                          </div>
-                        )
-                      ) : (
                         <div className="right-fold landing-col-6">
                           <h1 className="header">Verification Failed</h1>
                           <p className="para">

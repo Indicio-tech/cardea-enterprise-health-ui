@@ -112,6 +112,7 @@ function App() {
   const [QRCodeURL, setQRCodeURL] = useState('')
   const [focusedConnectionID, setFocusedConnectionID] = useState('')
   const [verificationStatus, setVerificationStatus] = useState()
+  const [verifiedCredential, setVerifiedCredential] = useState('')
 
   // (JamesKEbert) Note: We may want to abstract the websockets out into a high-order component for better abstraction, especially potentially with authentication/authorization
 
@@ -581,31 +582,16 @@ function App() {
         case 'PRESENTATIONS':
           switch (type) {
             case 'EMAIL_VERIFIED':
+              setVerifiedCredential(data.revealed_attrs)
               setVerificationStatus(true)
 
               break
 
             case 'VERIFICATION_FAILED':
+              setVerifiedCredential('')
               setVerificationStatus(false)
 
               break
-            default:
-              setNotification(
-                `Error - Unrecognized Websocket Message Type: ${type}`,
-                'error'
-              )
-              break
-          }
-
-          break
-
-        case 'PRESENTATIONS':
-          switch (type) {
-            case 'VERIFIED':
-              setNotification('Success - Verified Credential', 'notice')
-
-              break
-
             default:
               setNotification(
                 `Error - Unrecognized Websocket Message Type: ${type}`,
@@ -867,6 +853,7 @@ function App() {
                           sendRequest={sendAnonMessage}
                           contacts={contacts}
                           verificationStatus={verificationStatus}
+                          verifiedCredential={verifiedCredential}
                         />
                       </Main>
                     </Frame>
