@@ -79,7 +79,6 @@
 }
 .avatar-container.inline {
   display: none;
-  max-width: 50%;
 }
 
 @media only screen and (max-device-width: 1366px) {
