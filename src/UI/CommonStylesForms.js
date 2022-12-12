@@ -33,6 +33,13 @@ export const ModalHeader = styled.div`
   padding: 5px;
 `
 
+export const ModalSubHeader = styled.div`
+  width: 100%;
+  font-size: 1.6em;
+  padding-left: 44px;
+  margin-bottom: 15px;
+`
+
 export const ModalContentWrapper = styled.div`
   overflow: hidden;
   height: auto;
@@ -211,7 +218,7 @@ export const TextItem = styled.span`
 `
 export const ActionButton = styled.span`
   position: fixed;
-  bottom: 10px;
+  bottom: 40px;
   right: 10px;
   display: block;
   height: 64px;
@@ -227,4 +234,5 @@ export const ActionButton = styled.span`
   :hover {
     cursor: pointer;
   }
+  z-index: 1000;
 `

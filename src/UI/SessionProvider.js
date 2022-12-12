@@ -1,5 +1,4 @@
 import Axios from 'axios'
-import Cookies from 'universal-cookie'
 import { formatSeconds } from './util'
 
 import React, { useEffect, useState } from 'react'
@@ -9,8 +8,9 @@ import {
   StyledPopup,
   SubmitBtnModal,
   Modal,
-  ModalHeader,
   ModalContent,
+  ModalContentWrapper,
+  ModalHeader,
   TextWrapper,
 } from './CommonStylesForms'
 
@@ -18,8 +18,6 @@ const SessionAlertContext = React.createContext()
 
 // Exporting the session alert component
 export default function SessionAlertProvider(props) {
-  const cookies = new Cookies()
-
   const [open, setOpen] = useState(false)
   const [timer, setTimer] = useState()
   const [keepAlive, setKeepAlive] = useState(true)
@@ -48,7 +46,7 @@ export default function SessionAlertProvider(props) {
     if (timer === 5 && keepAlive)
       Axios({
         method: 'GET',
-        url: '/api/session',
+        url: '/api/renew-session',
       }).then((res) => {
         console.log(res)
         if (res.status) setTimer(60)
@@ -70,7 +68,7 @@ export default function SessionAlertProvider(props) {
     // Resetting the session cookie and local timer
     Axios({
       method: 'GET',
-      url: '/api/session',
+      url: '/api/renew-session',
     }).then((res) => {
       console.log(res)
       if (res.status) setTimer(60)
@@ -148,11 +146,13 @@ export default function SessionAlertProvider(props) {
   sessionAlert = (
     <StyledPopup open={open} closeOnDocumentClick={false} onClose={closeModal}>
       <Modal className="modal">
-        <ModalHeader>You've been incative for a while...</ModalHeader>
+        <ModalHeader>You've been inactive for a while...</ModalHeader>
         <form id="form" onSubmit={handleSubmit}>
-          <ModalContent>
-            <SecondsTimer />
-          </ModalContent>
+          <ModalContentWrapper>
+            <ModalContent>
+              <SecondsTimer />
+            </ModalContent>
+          </ModalContentWrapper>
           <Actions>
             <SubmitBtnModal type="submit">Yes</SubmitBtnModal>
           </Actions>

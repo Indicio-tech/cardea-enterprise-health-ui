@@ -1,5 +1,7 @@
 import React, { useRef } from 'react'
 
+import { DateTime } from 'luxon'
+
 import { useNotification } from './NotificationProvider'
 
 import {
@@ -18,78 +20,65 @@ import {
   TextItem,
 } from './CommonStylesForms'
 
-function FormTestResult(props) {
+function FormLabOrder(props) {
   const credentialForm = useRef(null)
   const setNotification = useNotification()
 
-  const surname =
-    props.contactSelected && props.contactSelected.Passport
-      ? JSON.parse(JSON.stringify(props.contactSelected.Passport.surname))
+  const surnames =
+    props.contactSelected && props.contactSelected.Demographic
+      ? JSON.parse(JSON.stringify(props.contactSelected.Demographic.surnames))
       : ''
   const given_names =
-    props.contactSelected && props.contactSelected.Passport
-      ? JSON.parse(JSON.stringify(props.contactSelected.Passport.given_names))
+    props.contactSelected && props.contactSelected.Demographic
+      ? JSON.parse(
+          JSON.stringify(props.contactSelected.Demographic.given_names)
+        )
       : ''
   const date_of_birth =
-    props.contactSelected && props.contactSelected.Passport
-      ? JSON.parse(JSON.stringify(props.contactSelected.Passport.date_of_birth))
-      : ''
-  const sex =
-    props.contactSelected && props.contactSelected.Passport
-      ? JSON.parse(JSON.stringify(props.contactSelected.Passport.sex))
-      : ''
-  const address_1 =
-    props.contactSelected &&
-    props.contactSelected.Demographic &&
-    props.contactSelected.Demographic.address
+    props.contactSelected && props.contactSelected.Demographic
       ? JSON.parse(
-          JSON.stringify(props.contactSelected.Demographic.address.address_1)
+          JSON.stringify(props.contactSelected.Demographic.date_of_birth)
         )
       : ''
-  const address_2 =
-    props.contactSelected &&
-    props.contactSelected.Demographic &&
-    props.contactSelected.Demographic.address
+  const gender_legal =
+    props.contactSelected && props.contactSelected.Demographic
       ? JSON.parse(
-          JSON.stringify(props.contactSelected.Demographic.address.address_2)
+          JSON.stringify(props.contactSelected.Demographic.gender_legal)
         )
       : ''
-  const address_null = address_2 === null ? '' : address_2
+  const street_address =
+    props.contactSelected && props.contactSelected.Demographic
+      ? JSON.parse(
+          JSON.stringify(props.contactSelected.Demographic.street_address)
+        )
+      : ''
   const city =
-    props.contactSelected &&
-    props.contactSelected.Demographic &&
-    props.contactSelected.Demographic.address
+    props.contactSelected && props.contactSelected.Demographic
+      ? JSON.parse(JSON.stringify(props.contactSelected.Demographic.city))
+      : ''
+  const state_province_region =
+    props.contactSelected && props.contactSelected.Demographic
       ? JSON.parse(
-          JSON.stringify(props.contactSelected.Demographic.address.city)
+          JSON.stringify(
+            props.contactSelected.Demographic.state_province_region
+          )
         )
       : ''
-  const state =
-    props.contactSelected &&
-    props.contactSelected.Demographic &&
-    props.contactSelected.Demographic.address
-      ? JSON.parse(
-          JSON.stringify(props.contactSelected.Demographic.address.state)
-        )
-      : ''
-  const zip_code =
-    props.contactSelected &&
-    props.contactSelected.Demographic &&
-    props.contactSelected.Demographic.address
-      ? JSON.parse(
-          JSON.stringify(props.contactSelected.Demographic.address.zip_code)
-        )
+  const postalcode =
+    props.contactSelected && props.contactSelected.Demographic
+      ? JSON.parse(JSON.stringify(props.contactSelected.Demographic.postalcode))
       : ''
   const country =
-    props.contactSelected &&
-    props.contactSelected.Demographic &&
-    props.contactSelected.Demographic.address
-      ? JSON.parse(
-          JSON.stringify(props.contactSelected.Demographic.address.country)
-        )
+    props.contactSelected && props.contactSelected.Demographic
+      ? JSON.parse(JSON.stringify(props.contactSelected.Demographic.country))
       : ''
   const phone =
     props.contactSelected && props.contactSelected.Demographic
       ? JSON.parse(JSON.stringify(props.contactSelected.Demographic.phone))
+      : ''
+  const email =
+    props.contactSelected && props.contactSelected.Demographic
+      ? JSON.parse(JSON.stringify(props.contactSelected.Demographic.email))
       : ''
 
   const handleSubmit = (e) => {
@@ -97,13 +86,9 @@ function FormTestResult(props) {
     const form = new FormData(credentialForm.current)
 
     let attributes = {}
-    if (
-      props.contactSelected &&
-      props.contactSelected.Demographic &&
-      props.contactSelected.Passport
-    ) {
+
+    if (props.contactSelected && props.contactSelected.Demographic) {
       const demographics = props.contactSelected.Demographic
-      const passport = props.contactSelected.Passport
 
       attributes = [
         {
@@ -115,67 +100,67 @@ function FormTestResult(props) {
           value: form.get('patient_local_id') || '',
         },
         {
-          name: 'patient_last_name',
-          value: passport.surname || '',
+          name: 'patient_surnames',
+          value: demographics.surnames || '',
         },
         {
-          name: 'patient_first_name',
-          value: passport.given_names || '',
+          name: 'patient_given_names',
+          value: demographics.given_names || '',
         },
         {
           name: 'patient_date_of_birth',
-          value: passport.date_of_birth || '',
+          value:
+            Math.floor(
+              DateTime.fromISO(form.get(demographics.date_of_birth)).ts / 1000
+            ).toString() || '',
         },
         {
           name: 'patient_gender_legal',
-          value: passport.sex || '',
+          value: demographics.gender_legal || '',
         },
         {
           name: 'patient_street_address',
-          value:
-            demographics.address.address_1 +
-              ' ' +
-              demographics.address.address_2 || '',
+          value: demographics.street_address || '',
         },
         {
           name: 'patient_city',
-          value: demographics.address.city || '',
+          value: demographics.city || '',
         },
         {
-          name: 'patient_state',
-          value: demographics.address.state || '',
+          name: 'patient_state_province_region',
+          value: demographics.state_province_region || '',
         },
         {
           name: 'patient_postalcode',
-          value: demographics.address.zip_code || '',
+          value: demographics.postalcode || '',
         },
         {
           name: 'patient_country',
-          value: demographics.address.country || '',
+          value: demographics.country || '',
         },
         {
           name: 'patient_phone',
           value: demographics.phone || '',
         },
         {
-          name: 'sending_facility',
-          value: form.get('sending_facility') || 'Horacio Oduber Hospital Lab',
-        },
-        {
-          name: 'visit_location',
-          value: form.get('visit_location') || 'Horacio Oduber Hospital Lab',
-        },
-        {
-          name: 'observation_date_time',
-          value: form.get('observation_date_time') || '',
+          name: 'patient_email',
+          value: demographics.email || '',
         },
         {
           name: 'lab_specimen_collected_date',
-          value: form.get('lab_specimen_collected_date') || '',
+          value:
+            Math.floor(
+              DateTime.fromISO(form.get('lab_specimen_collected_date')).ts /
+                1000
+            ).toString() || '',
         },
         {
-          name: 'result_status',
-          value: form.get('result_status') || '',
+          name: 'lab_specimen_type',
+          value: form.get('lab_specimen_type') || '',
+        },
+        {
+          name: 'lab_order_id',
+          value: form.get('lab_order_id') || '',
         },
         {
           name: 'lab_coding_qualifier',
@@ -187,39 +172,46 @@ function FormTestResult(props) {
         },
         {
           name: 'lab_description',
-          value: form.get('lab_description') || 'COVID-19 PCR Test',
+          value: form.get('lab_description') || '',
         },
         {
-          name: 'lab_order_id',
-          value: form.get('lab_order_id') || '',
+          name: 'lab_performed_by',
+          value: form.get('lab_performed_by') || '',
         },
         {
-          name: 'ordering_facility_address',
-          value: form.get('ordering_facility_address') || '',
+          name: 'ordering_facility_id',
+          value: form.get('ordering_facility_id') || '',
+        },
+        {
+          name: 'ordering_facility_id_qualifier',
+          value: form.get('ordering_facility_id_qualifier') || '',
         },
         {
           name: 'ordering_facility_name',
           value: form.get('ordering_facility_name') || '',
         },
         {
-          name: 'date_time_of_message',
-          value: form.get('date_time_of_message') || '',
+          name: 'ordering_facility_state_province_region',
+          value: form.get('ordering_facility_state_province_region') || '',
         },
         {
-          name: 'normality',
-          value: form.get('normality') || '',
+          name: 'ordering_facility_postalcode',
+          value: form.get('ordering_facility_postalcode') || '',
         },
         {
-          name: 'result',
-          value: form.get('result') || '',
+          name: 'ordering_facility_country',
+          value: form.get('ordering_facility_country') || '',
         },
         {
-          name: 'comment',
-          value: form.get('comment') || '',
+          name: 'credential_issuer_name',
+          value: form.get('credential_issuer_name') || '',
         },
         {
-          name: 'performing_lab',
-          value: form.get('performing_lab') || '',
+          name: 'credential_issue_date',
+          value:
+            Math.floor(
+              DateTime.fromISO(form.get('credential_issue_date')).ts / 1000
+            ).toString() || '',
         },
       ]
     } else {
@@ -229,15 +221,18 @@ function FormTestResult(props) {
       )
     }
 
+    let schema = props.schemas.SCHEMA_LAB_ORDER
+    let schemaParts = schema.split(':')
+
     let newCredential = {
       connectionID: props.contactSelected.Connections[0].connection_id,
-      schemaID: 'X2JpGAqC7ZFY4hwKG6kLw9:2:Covid_19_Lab_Result:1.5',
-      schemaVersion: '1.5',
-      schemaName: 'Covid_19_Lab_Result',
-      schemaIssuerDID: 'X2JpGAqC7ZFY4hwKG6kLw9',
-      comment: form.get('comment'),
+      schemaID: schema,
+      schemaVersion: schemaParts[3],
+      schemaName: schemaParts[2],
+      schemaIssuerDID: schemaParts[0],
       attributes: attributes,
     }
+
     props.submitCredential(newCredential, e)
     props.closeCredentialModal()
   }
@@ -253,11 +248,11 @@ function FormTestResult(props) {
       onClose={closeModal}
     >
       <Modal className="modal">
-        <ModalHeader>Issue Test Result</ModalHeader>
+        <ModalHeader>Issue Lab Order</ModalHeader>
         <ModalContentWrapper>
           <ModalContent>
             <form onSubmit={handleSubmit} ref={credentialForm}>
-              {/* <InputBox>
+              <InputBox>
                 <ModalLabel htmlFor="mpid">MPID</ModalLabel>
                 <InputFieldModal
                   type="text"
@@ -265,8 +260,8 @@ function FormTestResult(props) {
                   id="mpid"
                   placeholder="12345"
                 />
-              </InputBox> */}
-              {/* <InputBox>
+              </InputBox>
+              <InputBox>
                 <ModalLabel htmlFor="patient_local_id">
                   Patient Local ID
                 </ModalLabel>
@@ -276,27 +271,27 @@ function FormTestResult(props) {
                   id="patient_local_id"
                   placeholder="685744"
                 />
-              </InputBox> */}
+              </InputBox>
               <InputBox>
-                <ModalLabel htmlFor="patient_last_name">
-                  Patient Last Name
+                <ModalLabel htmlFor="patient_surnames">
+                  Patient Surnames
                 </ModalLabel>
                 <TextItem
                   type="text"
-                  name="patient_last_name"
-                  id="patient_last_name"
+                  name="patient_surnames"
+                  id="patient_surnames"
                 >
-                  {surname}
+                  {surnames}
                 </TextItem>
               </InputBox>
               <InputBox>
-                <ModalLabel htmlFor="patient_first_name">
-                  Patient First Name
+                <ModalLabel htmlFor="patient_given_names">
+                  Patient Given Names
                 </ModalLabel>
                 <TextItem
                   type="text"
-                  name="patient_first_name"
-                  id="patient_first_name"
+                  name="patient_given_names"
+                  id="patient_given_names"
                 >
                   {given_names}
                 </TextItem>
@@ -313,19 +308,19 @@ function FormTestResult(props) {
                   {date_of_birth}
                 </TextItem>
               </InputBox>
-              {/* <InputBox>
+              <InputBox>
                 <ModalLabel htmlFor="patient_gender_legal">
-                  Patient Legal Gender
+                  Patient Gender Legal
                 </ModalLabel>
                 <TextItem
                   type="text"
                   name="patient_gender_legal"
                   id="patient_gender_legal"
                 >
-                  {sex}
+                  {gender_legal}
                 </TextItem>
-              </InputBox> */}
-              {/* <InputBox>
+              </InputBox>
+              <InputBox>
                 <ModalLabel htmlFor="patient_street_address">
                   Patient Street Address
                 </ModalLabel>
@@ -334,36 +329,42 @@ function FormTestResult(props) {
                   name="patient_street_address"
                   id="patient_street_address"
                 >
-                  {address_1 + ' ' + address_null}
+                  {street_address}
                 </TextItem>
-              </InputBox> */}
-              {/* <InputBox>
+              </InputBox>
+              <InputBox>
                 <ModalLabel htmlFor="patient_city">Patient City</ModalLabel>
                 <TextItem type="text" name="patient_city" id="patient_city">
                   {city}
                 </TextItem>
-              </InputBox> */}
-              {/* <InputBox>
-                <ModalLabel htmlFor="patient_state">Patient State </ModalLabel>
-                <TextItem type="text" name="patient_state" id="patient_state">
-                  {state}
+              </InputBox>
+              <InputBox>
+                <ModalLabel htmlFor="patient_state_province_region">
+                  Patient State/Province/Region{' '}
+                </ModalLabel>
+                <TextItem
+                  type="text"
+                  name="patient_state_province_region"
+                  id="patient_state_province_region"
+                >
+                  {state_province_region}
                 </TextItem>
-              </InputBox> */}
-              {/* <InputBox>
+              </InputBox>
+              <InputBox>
                 <ModalLabel htmlFor="patient_postalcode">
-                  Patient Postal Code{' '}
+                  Patient Postal Code
                 </ModalLabel>
                 <TextItem
                   type="text"
                   name="patient_postalcode"
                   id="patient_postalcode"
                 >
-                  {zip_code}
+                  {postalcode}
                 </TextItem>
-              </InputBox> */}
-              {/* <InputBox>
+              </InputBox>
+              <InputBox>
                 <ModalLabel htmlFor="patient_country">
-                  Patient Country{' '}
+                  Patient Country
                 </ModalLabel>
                 <TextItem
                   type="text"
@@ -372,9 +373,9 @@ function FormTestResult(props) {
                 >
                   {country}
                 </TextItem>
-              </InputBox> */}
-              {/* <InputBox>
-                <ModalLabel htmlFor="patient_phone">Patient Phone </ModalLabel>
+              </InputBox>
+              <InputBox>
+                <ModalLabel htmlFor="patient_phone">Patient Phone</ModalLabel>
                 <TextItem
                   type="numeric"
                   name="patient_phone"
@@ -382,29 +383,13 @@ function FormTestResult(props) {
                 >
                   {phone}
                 </TextItem>
-              </InputBox> */}
-              {/*<InputBox>
-                <ModalLabel htmlFor="sending_facility">
-                  Sending Facility
-                </ModalLabel>
-                <InputFieldModal
-                  type="text"
-                  name="sending_facility"
-                  id="sending_facility"
-                  placeholder="Horacio Oduber Hospital Lab"
-                  defaultValue="Horacio Oduber Hospital Lab"
-                />
               </InputBox>
               <InputBox>
-                <ModalLabel htmlFor="visit_location">Visit Location</ModalLabel>
-                <InputFieldModal
-                  type="text"
-                  name="visit_location"
-                  id="visit_location"
-                  placeholder="Horacio Oduber Hospital Lab"
-                  defaultValue="Horacio Oduber Hospital Lab"
-                />
-              </InputBox>*/}
+                <ModalLabel htmlFor="patient_email">Patient Email</ModalLabel>
+                <TextItem type="text" name="patient_email" id="patient_email">
+                  {email}
+                </TextItem>
+              </InputBox>
               <InputBox>
                 <ModalLabel htmlFor="lab_specimen_collected_date">
                   Lab Specimen Collected Date
@@ -416,25 +401,26 @@ function FormTestResult(props) {
                 />
               </InputBox>
               <InputBox>
-                <ModalLabel htmlFor="observation_date_time">
-                  Observation Date Time
+                <ModalLabel htmlFor="lab_specimen_type">
+                  Lab Specimen Type
                 </ModalLabel>
                 <InputFieldModal
-                  type="date"
-                  name="observation_date_time"
-                  id="observation_date_time"
+                  type="text"
+                  name="lab_specimen_type"
+                  id="lab_specimen_type"
+                  placeholder=""
                 />
               </InputBox>
               <InputBox>
-                <ModalLabel htmlFor="result_status">Result Status</ModalLabel>
+                <ModalLabel htmlFor="lab_order_id">Lab Order ID</ModalLabel>
                 <InputFieldModal
                   type="text"
-                  name="result_status"
-                  id="result_status"
-                  placeholder="F"
+                  name="lab_order_id"
+                  id="lab_order_id"
+                  placeholder=""
                 />
               </InputBox>
-              {/* <InputBox>
+              <InputBox>
                 <ModalLabel htmlFor="lab_coding_qualifier">
                   Lab Coding Qualifier
                 </ModalLabel>
@@ -444,8 +430,8 @@ function FormTestResult(props) {
                   id="lab_coding_qualifier"
                   placeholder="PRC"
                 />
-              </InputBox> */}
-              {/* <InputBox>
+              </InputBox>
+              <InputBox>
                 <ModalLabel htmlFor="lab_code">Lab Code</ModalLabel>
                 <InputFieldModal
                   type="text"
@@ -453,8 +439,8 @@ function FormTestResult(props) {
                   id="lab_code"
                   placeholder="67890"
                 />
-              </InputBox> */}
-              {/* <InputBox>
+              </InputBox>
+              <InputBox>
                 <ModalLabel htmlFor="lab_description">
                   Lab Description
                 </ModalLabel>
@@ -462,30 +448,43 @@ function FormTestResult(props) {
                   type="text"
                   name="lab_description"
                   id="lab_description"
-                  placeholder="Covid-19 swab test"
-                />
-              </InputBox> */}
-              <InputBox>
-                <ModalLabel htmlFor="lab_order_id">Lab Order ID</ModalLabel>
-                <InputFieldModal
-                  type="text"
-                  name="lab_order_id"
-                  id="lab_order_id"
-                  placeholder="12345"
+                  placeholder=""
                 />
               </InputBox>
-              {/* <InputBox>
-                <ModalLabel htmlFor="ordering_facility_address">
-                  Ordering Facility Address
+              <InputBox>
+                <ModalLabel htmlFor="lab_performed_by">
+                  Lab Performed By
                 </ModalLabel>
                 <InputFieldModal
                   type="text"
-                  name="ordering_facility_address"
-                  id="ordering_facility_address"
-                  placeholder="1234 St."
+                  name="lab_performed_by"
+                  id="lab_performed_by"
+                  placeholder=""
                 />
-              </InputBox> */}
-              {/* <InputBox>
+              </InputBox>
+              <InputBox>
+                <ModalLabel htmlFor="ordering_facility_id">
+                  Ordering Facility ID
+                </ModalLabel>
+                <InputFieldModal
+                  type="text"
+                  name="ordering_facility_id"
+                  id="ordering_facility_id"
+                  placeholder=""
+                />
+              </InputBox>
+              <InputBox>
+                <ModalLabel htmlFor="ordering_facility_id_qualifier">
+                  Ordering Facility ID Qualifier
+                </ModalLabel>
+                <InputFieldModal
+                  type="text"
+                  name="ordering_facility_id_qualifier"
+                  id="ordering_facility_id_qualifier"
+                  placeholder=""
+                />
+              </InputBox>
+              <InputBox>
                 <ModalLabel htmlFor="ordering_facility_name">
                   Ordering Facility Name
                 </ModalLabel>
@@ -493,56 +492,64 @@ function FormTestResult(props) {
                   type="text"
                   name="ordering_facility_name"
                   id="ordering_facility_name"
-                  placeholder="Health Facility"
+                  placeholder=""
                 />
-              </InputBox> */}
+              </InputBox>
               <InputBox>
-                <ModalLabel htmlFor="date_time_of_message">
-                  Date Time of Message
+                <ModalLabel htmlFor="ordering_facility_state_province_region">
+                  Ordering Facility State/Province/Region
+                </ModalLabel>
+                <InputFieldModal
+                  type="text"
+                  name="ordering_facility_state_province_region"
+                  id="ordering_facility_state_province_region"
+                  placeholder=""
+                />
+              </InputBox>
+              <InputBox>
+                <ModalLabel htmlFor="ordering_facility_postalcode">
+                  Ordering Facility Postalcode
+                </ModalLabel>
+                <InputFieldModal
+                  type="text"
+                  name="ordering_facility_postalcode"
+                  id="ordering_facility_postalcode"
+                  placeholder=""
+                />
+              </InputBox>
+              <InputBox>
+                <ModalLabel htmlFor="ordering_facility_country">
+                  Ordering Facility Country
+                </ModalLabel>
+                <InputFieldModal
+                  type="text"
+                  name="ordering_facility_country"
+                  id="ordering_facility_country"
+                  placeholder=""
+                />
+              </InputBox>
+              <InputBox>
+                <ModalLabel htmlFor="credential_issuer_name">
+                  Credential Issuer Name
+                </ModalLabel>
+                <InputFieldModal
+                  type="text"
+                  name="credential_issuer_name"
+                  id="credential_issuer_name"
+                  placeholder=""
+                />
+              </InputBox>
+              <InputBox>
+                <ModalLabel htmlFor="credential_issue_date">
+                  Credential Issue Date
                 </ModalLabel>
                 <InputFieldModal
                   type="date"
-                  name="date_time_of_message"
-                  id="date_time_of_message"
-                />
-              </InputBox>
-              <InputBox>
-                <ModalLabel htmlFor="normality">Normality</ModalLabel>
-                <InputFieldModal
-                  type="text"
-                  name="normality"
-                  id="normality"
-                  placeholder="Normal"
-                />
-              </InputBox>
-              <InputBox>
-                <ModalLabel htmlFor="result">Result</ModalLabel>
-                <InputFieldModal
-                  type="text"
-                  name="result"
-                  id="result"
-                  placeholder="Negative"
-                />
-              </InputBox>
-              {/* Future !!! -Megan O */}
-              {/* <InputBox>
-                <ModalLabel htmlFor="comment">Comment</ModalLabel>
-                <InputFieldModal
-                  type="text"
-                  name="comment"
-                  id="comment"
+                  name="credential_issue_date"
+                  id="credential_issue_date"
                   placeholder=""
                 />
-              </InputBox> */}
-              {/* <InputBox>
-                <ModalLabel htmlFor="performing_lab">Performing Lab</ModalLabel>
-                <InputFieldModal
-                  type="text"
-                  name="performing_lab"
-                  id="performing_lab"
-                  placeholder=""
-                />
-              </InputBox> */}
+              </InputBox>
               <Actions>
                 <CancelBtn type="button" onClick={closeModal}>
                   Cancel
@@ -558,4 +565,4 @@ function FormTestResult(props) {
   )
 }
 
-export default FormTestResult
+export default FormLabOrder
